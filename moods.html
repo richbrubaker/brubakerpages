@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mood Guessing Game</title>
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      background-color: #f9f5e8; /* Creamy background color */
+      color: #4d4d4d; /* Dark gray text color */
+      margin: 0;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #moodContainer {
+      text-align: center;
+    }
+
+    #moodContainer p {
+      display: inline-block;
+      margin: 5px;
+      padding: 10px;
+      border: 2px solid #e18f5e; /* Pumpkin border color */
+      border-radius: 5px;
+      background-color: #f9d2ab; /* Light pumpkin background color */
+    }
+
+    #moodContainer p.highlight {
+      background-color: #e18f5e; /* Pumpkin highlight color */
+      color: #ffffff; /* White text color */
+    }
+
+    #gameContainer {
+      background-color: #ffffff; /* White game container */
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+      margin-top: 20px; /* Add margin to separate from #moodContainer */
+    }
+
+    #questionContainer {
+      margin-top: 20px;
+    }
+
+    #question {
+      font-style: italic;
+    }
+
+    #moodListContainer {
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 10px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #e18f5e; /* Pumpkin button color */
+      color: #ffffff; /* White text color */
+    }
+
+    button.hidden {
+      display: none;
+    }
+
+    button:hover {
+      background-color: #d17e4d; /* Darker pumpkin color on hover */
+    }
+
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 10px;
+      text-align: center;
+      border: 2px solid #e18f5e; /* Pumpkin border color */
+      border-radius: 5px;
+      background-color: #f9d2ab; /* Light pumpkin background color */
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="moodContainer"></div>
+
+  <div id="gameContainer">
+    <div>
+    <div id="questionContainer">
+      <p id="question"></p>
+    </div>
+<br/>
+    <div id="moodListContainer">
+      <button id="hideAnswerButton" onclick="startGame()">Hide Answer</button>
+      <button id="revealButton" class="hidden" onclick="revealCorrectMood()">Reveal</button>
+      <button id="resetButton" class="hidden" onclick="resetGame()">Reset</button>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    const allMoods = ['Ecstatic', 'Gloomy', 'Enraged', 'Hopeful', 'Serene', 'Startled', 'Puzzled', 'Satisfied', 'Joyful', 'Reflective',
+  'Playful', 'Inspired', 'Apathetic', 'Amazed', 'Resigned', 'Determined', 'Mellow', 'Cheerful', 'Mournful', 'Blissful',
+  'Thrilled', 'Disheartened', 'Furious', 'Eager', 'Tranquil', 'Shocked', 'Perplexed', 'Fulfilled', 'Optimistic', 'Melancholic',
+  'Dazzled', 'Indifferent', 'Animated', 'Elated', 'Hopeless', 'Calm', 'Agitated', 'Curious', 'Contemplative', 'Elated',
+  'Whimsical', 'Motivated', 'Aloof', 'Grateful', 'Bewildered', 'Empowered', 'Laid-back', 'Jovial', 'Dismal', 'Sanguine',
+  'Zestful', 'Defeated', 'Vexed', 'Zealous', 'Blithe', 'Aghast', 'Ephemeral', 'Hesitant', 'Intrigued', 'Amused',
+  'Vibrant', 'Anguished', 'Zealous', 'Candid', 'Blithe', 'Rapturous', 'Cynical', 'Spirited', 'Desolate', 'Energetic',
+  'Desperate', 'Overjoyed', 'Solemn', 'Exhilarated', 'Wistful', 'Pensive', 'Buoyant', 'Doleful', 'Eclectic', 'Stoic',
+  'Radiant', 'Nonchalant', 'Enigmatic', 'Blissful', 'Witty', 'Hopeless', 'Ebullient', 'Aghast', 'Jubilant', 'Bittersweet',
+  'Whimsical', 'Enchanted', 'Aghast', 'Astonished', 'Rejuvenated', 'Awestruck', 'Dreadful', 'Euphoric', 'Mirthful', 'Unsettled','Hopeful', 'Elated', 'Peaceful', 'Playful', 'Inspired', 'Calm', 'Content', 'Joyful', 'Cheerful', 'Excited',
+  'Amused', 'Eager', 'Grateful', 'Satisfied', 'Optimistic', 'Serene', 'Determined', 'Pleased', 'Motivated', 'Ecstatic',
+  'Enthusiastic', 'Fulfilled', 'Blissful', 'Radiant', 'Buoyant', 'Lighthearted', 'Whimsical', 'Energetic', 'Zestful', 'Dynamic',
+  'Lively', 'Vibrant', 'Exuberant', 'Jovial', 'Merry', 'Upbeat', 'Sunny', 'Carefree', 'Spontaneous', 'Adventurous',
+  'Bold', 'Daring', 'Fearless', 'Hopeless', 'Melancholic', 'Disheartened', 'Sorrowful', 'Gloomy', 'Despondent', 'Downcast',
+  'Blue', 'Dejected', 'Somber', 'Forlorn', 'Regretful', 'Wistful', 'Nostalgic', 'Sentimental', 'Reflective', 'Thoughtful',
+  'Contemplative', 'Pensive', 'Introspective', 'Mournful', 'Dismal', 'Bittersweet', 'Tender', 'Touching', 'Melancholy', 'Tearful',
+  'Touched', 'Sensitive', 'Sympathetic', 'Empathetic', 'Concerned', 'Compassionate', 'Understanding', 'Kindhearted', 'Generous', 'Warm',
+  'Nurturing', 'Affectionate', 'Loving', 'Caring', 'Tenderhearted', 'Sympathetic', 'Friendly', 'Amiable', 'Kind', 'Gentle',
+  'Warmhearted', 'Romantic', 'Passionate', 'Tender', 'Affectionate', 'Loving', 'Intimate', 'Sentimental', 'Enamored', 'Infatuated',
+  'Attached', 'Devoted', 'Covetous', 'Adoring', 'Fascinated', 'Rapturous', 'Enchanted', 'Entranced', 'Enthralled', 'Spellbound' ];
+  const questions = [
+  "Toto, I've got a feeling we're not in Kansas anymore.",
+  "You can't handle the truth.",
+  "If you build it, he will come.",
+  "You've got to ask yourself one question: 'Do I feel lucky?' Well, do ya, punk?",
+  "One morning I shot an elephant in my pajamas. How he got in my pajamas, I don't know.",
+  "Keep your friends close, but your enemies closer.",
+  "Wait a minute, wait a minute. You ain't heard nothin' yet.",
+  "I'll get you, my pretty, and your little dog, too!",
+  "My wallet is like an onion. Every time I open it, it makes me cry.",
+  "A diamond is just a lump of coal that did well under pressure.",
+  "Whatever you’re doing, always give 100 percent. Unless you’re donating blood.",
+  "I’m on a seafood diet. I see food, and then I eat it.",
+  "I finally found a machine at the gym that I like: the vending machine!",
+  "Unless your name is Google, stop acting like you know everything.",
+  "If you’re not supposed to eat at night, then why is there a light bulb in the fridge?",
+  "Don’t worry if plan A fails, there are 25 more letters in the alphabet.",
+  "Why be moody when you can shake your booty?!",
+  "I refuse to have a battle of wits with an opponent so clearly unarmed.",
+  "A computer once beat me at chess, but it was no match for me at kickboxing.",
+  "The first five days after the weekend are the toughest.",
+  "Of course I talk to myself. Sometimes I need an expert opinion.",
+  "To do something right you got to do it yourself.",
+  "Mirror mirror on the wall who is the fairest of them all?",
+  "You ain't nothin' but a hound dog.",
+  "I Taut I taw a puddy tat.",
+  "You're not fully clean unless you're zest fully clean.",
+  "Pardon me, but do you have any Grey Poupon?",
+  "I can't believe I ate that whole thing.",
+  "I've failed over and over and over again in my life. And that is why I succeed.",
+  "Silly rabbit. Trix are for kids.",
+  "I am swift as a gazelle. An old one. With arthritis. Run over by a Land Rover. 8 days ago.",
+  "I didn’t fall down. I did attack the floor, though.",
+  "I don’t need a hair stylist, my pillow gives me a new hairstyle every morning.",
+  "I don’t suffer from insanity, I enjoy every minute of it.",
+  "I had loads to do today. Ah well, so now I have loads to do tomorrow.",
+  "I refuse to answer that question on the grounds that I don’t know the answer.",
+  "I think the worst time to have a heart attack is during a game of charades.",
+  "I used to think that you were a pain in the neck. My opinion of you has dropped significantly lower since then.",
+  "Do you remember when I asked you to give me your opinion? That’s right, me neither.",
+  "I’m not lazy. I’m just highly motivated to do nothing.",
+  "A jellyfish has existed as a species for 500 million years, surviving just fine without a brain. That gives hope to quite a few people.",
+  "Birthdays are good for you. Statistics show that people who have the most live the longest.",
+  "I don’t care what people think of me. Mosquitos find me attractive!",
+  "It’s okay if you don’t like me. Not everyone has good taste.",
+  "We can’t all be princesses. Someone has to wave when I roll by.",
+  "I’d agree with you, but then we’d both be wrong.",
+  "Is it me or is everyone else coo coo for Coco Puffs?",
+  "I volunteer as Tribute",
+  "Hello, my name is Inigo Montoya. You killed my father. Prepare to die.",
+  "I want my two dollars",
+  "You’ll shoot your eye out, kid.",
+  "Keep the change, ya filthy animal.",
+  "I'm the king of the world",
+  "I think I'm falling in love with you",
+  "May the Force be with you, always.",
+  "Roads? Where we're going we don't need roads.",
+  "They may take our lives, but they'll never take our freedom!",
+  "Fasten your seatbelts. It's going to be a bumpy night.",
+  "My mama always said life was like a box of chocolates. You never know what you're gonna get.",
+  "Toto, I've got a feeling we're not in Kansas anymore.",
+  "I told my computer I needed a break. Now it won't stop sending me vacation ads.",
+  "My mood ring is missing. I don't know how I feel about that.",
+  "Tried to catch some fog. I mist.",
+  "I asked the librarian if the library had books on paranoia. She whispered, 'They're right behind you.'",
+  "My wife said I should embrace my mistakes. So, I gave her a hug.",
+  "Why did the bicycle fall over? It was two-tired!",
+  "Why don't skeletons fight each other? They don't have the guts.",
+  "Reading a book on anti-gravity. It's uplifting!",
+  "My math book looked sad. Too many problems.",
+  "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+  "My mood swings like a pendulum on caffeine.",
+  "I'm on a whiskey diet. I've lost three days already.",
+  "I'm writing a book on hurricanes. It's only a draft at the moment.",
+  "Why did the tomato turn red? It saw the salad dressing!",
+  "Told my wife she should embrace her mistakes. She gave me a hug.",
+  "Why don't scientists trust atoms? They make up everything!",
+  "I'm reading a book about reverse psychology. Please don't buy it.",
+  "Why did the cookie go to the doctor? Because it was feeling crumbly!",
+  "What did one plate say to another? Tonight, dinner's on me!",
+  "Why did the banana go to the party? Because it was a-peeling!",
+  "How do you organize a space party? You planet!",
+  "What did one hat say to another? Stay here, I'm going on ahead!",
+  "Why don't skeletons fight each other? They don't have the guts.",
+  "What do you call a dinosaur with an extensive vocabulary? A thesaurus!",
+  "Why did the teddy bear say no to dessert? Because it was stuffed!",
+  "What did one wall say to the other wall? 'I'll meet you at the corner!'",
+  "Why did the scarecrow become a successful politician? Because he was outstanding in his field!",
+  "What do you call cheese that isn't yours? Nacho cheese!",
+  "Why did the math book look sad? Because it had too many problems.",
+  "Why did the bicycle fall over? It was two-tired!",
+  "Why did the tomato turn red? Because it saw the salad dressing!",
+  "Why don't scientists trust atoms? Because they make up everything!",
+  "What do you call a fish with no eyes? Fsh!",
+  "Why did the chicken go to the seance? To talk to the other side!",
+  "What do you get if you cross a snowman and a vampire? Frostbite!",
+  "Why did the lion eat the tightrope walker? Because he wanted a well-balanced meal!",
+  "How do you catch a squirrel? Climb a tree and act like a nut!",
+  "Why don't seagulls fly over the bay? Because then they'd be bagels!",
+  "What do you call a pile of cats? A meowtain!",
+  "Why did the scarecrow win an award? Because he was outstanding in his field!",
+  "I told my wife she was drawing her eyebrows too low. She looked surprised.",
+  "I'm reading a book on anti-gravity. It's impossible to put down!",
+  "Why don't oysters donate to charity? Because they are shellfish!",
+  "I used to play piano by ear, but now I use my hands and fingers.",
+  "I only know 25 letters of the alphabet. I don't know y.",
+  "I used to be a baker because I kneaded dough.",
+  "I only know 25 letters of the alphabet. I don't know y.",
+  "I told my computer I needed a break. Now it won't stop sending me vacation ads.",
+  "My mood ring is missing. I don't know how I feel about that.",
+  "Tried to catch some fog. I mist.",
+  "I asked the librarian if the library had books on paranoia. She whispered, 'They're right behind you.'",
+  "My wife said I should embrace my mistakes. So, I gave her a hug.",
+  "Why did the bicycle fall over? It was two-tired!",
+  "Why don't skeletons fight each other? They don't have the guts.",
+  "Reading a book on anti-gravity. It's uplifting!",
+  "My math book looked sad. Too many problems.",
+  "I told my wife she was drawing her eyebrows too high. She looked surprised.",
+  "My mood swings like a pendulum on caffeine.",
+  "I'm on a whiskey diet. I've lost three days already.",
+  "I'm writing a book on hurricanes. It's only a draft at the moment.",
+  "Why did the tomato turn red? It saw the salad dressing!",
+  "Told my wife she should embrace her mistakes. She gave me a hug.",
+  "Why don't scientists trust atoms? They make up everything!",
+  "I'm reading a book about reverse psychology. Please don't buy it.",
+  "Why did the scarecrow win an award? Because he was outstanding in his field!",
+  "I told my wife she was drawing her eyebrows too low. She looked surprised.",
+  "I'm reading a book on anti-gravity. It's impossible to put down!",
+  "Why don't oysters donate to charity? Because they are shellfish!",
+  "I used to play piano by ear, but now I use my hands and fingers.",
+  "I used to be a baker because I kneaded dough.",
+  "I only know 25 letters of the alphabet. I don't know y.",
+];
+
+
+    let currentMoodIndex;
+    let removedMoodIndices;
+
+    function getRandomMoods() {
+      // Shuffle the array of all moods
+      const shuffledMoods = allMoods.sort(() => Math.random() - 0.5);
+      // Select the first 9 moods
+      return shuffledMoods.slice(0, 9);
+    }
+
+    function initializeGame() {
+      // Shuffle the array of questions
+      const shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+
+      // Display the list of moods with one highlighted and the question when loaded
+      document.getElementById('moodContainer').classList.remove('hidden');
+      document.getElementById('questionContainer').classList.remove('hidden');
+
+      // Get 9 random moods
+      const currentMoodIndices = getRandomMoods();
+
+      // Highlight a random mood
+      currentMoodIndex = Math.floor(Math.random() * currentMoodIndices.length);
+      const moodContainer = document.getElementById('moodContainer');
+      moodContainer.innerHTML = currentMoodIndices.map(mood => `<p>${mood}</p>`).join('');
+      moodContainer.querySelectorAll('p')[currentMoodIndex].classList.add('highlight');
+
+      // Set a random question
+      document.getElementById('question').textContent = `Question: ${shuffledQuestions[currentMoodIndex]}`;
+    }
+
+    function startGame() {
+      // Remember the selected mood and remove highlighting
+      removedMoodIndices = currentMoodIndex;
+      document.getElementById('moodContainer').querySelectorAll('p')[removedMoodIndices].classList.remove('highlight');
+
+      // Show the list of moods without highlighting and hide the question
+      document.getElementById('questionContainer').classList.add('hidden');
+      document.getElementById('moodListContainer').classList.remove('hidden');
+      // Hide the "Hide Answer" button and show the "Reveal" button
+      document.getElementById('hideAnswerButton').classList.add('hidden');
+      document.getElementById('revealButton').classList.remove('hidden');
+      // Hide the "Reset" button
+      document.getElementById('resetButton').classList.add('hidden');
+    }
+
+    function revealCorrectMood() {
+      // Reselect the removed mood and highlight it
+      currentMoodIndex = removedMoodIndices;
+      document.getElementById('moodContainer').querySelectorAll('p')[currentMoodIndex].classList.add('highlight');
+
+      // Show the initial screen with the full list of moods, the highlighted mood, and the question
+      document.getElementById('questionContainer').classList.remove('hidden');
+      document.getElementById('moodListContainer').classList.add('hidden');
+      // Show the "Reset" button
+      document.getElementById('resetButton').classList.remove('hidden');
+    }
+
+    function resetGame() {
+      // Reset everything to the initial state
+      initializeGame();
+      document.getElementById('hideAnswerButton').classList.remove('hidden');
+      document.getElementById('revealButton').classList.add('hidden');
+      document.getElementById('resetButton').classList.add('hidden');
+    }
+
+    // Initialize the game on page load
+    initializeGame();
+  </script>
+
+</body>
+
+</html>
